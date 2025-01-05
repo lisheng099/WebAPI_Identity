@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using WebAPI.Dtos;
+using WebAPI.Dtos.News;
+using WebAPI.Dtos.NewsFiles;
 using WebAPI.Models;
 
 namespace WebAPI.Abstracts

@@ -16,9 +16,9 @@ public partial class News
 
     public DateTime UpdateDateTime { get; set; }
 
-    public Guid InsertEmployeeId { get; set; }
+    public string InsertEmployeeId { get; set; }
 
-    public Guid UpdateEmployeeId { get; set; }
+    public string UpdateEmployeeId { get; set; }
 
     public int Click { get; set; }
 
@@ -26,7 +26,7 @@ public partial class News
 
     public int Order { get; set; }
 
-    public virtual Employee InsertEmployee { get; set; }
-    public virtual Employee UpdateEmployee { get; set; }
+    public virtual ApplicationUser InsertEmployee { get; set; }
+    public virtual ApplicationUser UpdateEmployee { get; set; }
     public virtual ICollection<NewsFiles> NewsFiles { get; set; }
 }

@@ -2,12 +2,11 @@
 using WebAPI.Abstracts;
 using WebAPI.ValidationAttributes;
 
-namespace WebAPI.Dtos
+namespace WebAPI.Dtos.News
 {
-    public class NewsPutDto: NewsDtoAbstract
+    public class NewsPutDto : NewsDtoAbstract
     {
         [Required]
         public Guid NewsId { get; set; }
-        public Guid UpdataEmployeeId { get; set; }
     }
 }

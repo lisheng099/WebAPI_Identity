@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebAPI.Dtos
+namespace WebAPI.Dtos.NewsFiles
 {
     public class NewsFilesPostDto
     {
         [Required]
-        public string Name { get; set; } = null!;
-        [Required]
-        public string Path { get; set; } = null!;
+        public Guid NewsId { get; set; }
         public string Extension { get; set; } = null!;
+        public List<IFormFile> files { get; set; }
     }
 }

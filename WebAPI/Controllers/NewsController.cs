@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.Dtos;
+using WebAPI.Dtos.News;
 using WebAPI.Interfaces;
 using WebAPI.Parameters;
 
@@ -10,12 +11,14 @@ namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NewsController(INewsServer newsServer) : ControllerBase
+
+    public class NewsController(INewsService newsServer) : ControllerBase
     {
-        private readonly INewsServer _newsServer = newsServer;
+        private readonly INewsService _newsServer = newsServer;
 
         // GET: api/<NewsController>
         [HttpGet]
+        [Authorize(Roles = "User")]
         public IActionResult Get([FromQuery]NewsSelectParameter parameter)
         {
             var result = _newsServer.GetNewsByParameter(parameter);
@@ -29,6 +32,7 @@ namespace WebAPI.Controllers
 
         // GET api/<NewsController>/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "User")]
         public IActionResult Get(string id)
         {
             if(Guid.TryParse(id, out Guid newsId))
@@ -49,6 +53,7 @@ namespace WebAPI.Controllers
 
         // POST api/<NewsController>
         [HttpPost]
+        [Authorize(Roles = "User")]
         public IActionResult Post([FromBody] NewsPostDto value)
         {
             var result = _newsServer.PostNews(value);
@@ -62,6 +67,7 @@ namespace WebAPI.Controllers
 
         // PUT api/<NewsController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "User")]
         public IActionResult Put(string id, [FromBody] NewsPutDto value)
         {
             if (Guid.TryParse(id, out Guid newsId))
@@ -83,6 +89,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "User")]
         public IActionResult Patch(string id, [FromBody] JsonPatchDocument value)
         {
             if (Guid.TryParse(id, out Guid newsId))
@@ -106,6 +113,7 @@ namespace WebAPI.Controllers
 
         // DELETE api/<NewsController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(string id)
         {
             if (Guid.TryParse(id, out var newsId))

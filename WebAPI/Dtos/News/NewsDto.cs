@@ -1,7 +1,8 @@
 ﻿using WebAPI.Abstracts;
+using WebAPI.Dtos.NewsFiles;
 using WebAPI.ValidationAttributes;
 
-namespace WebAPI.Dtos
+namespace WebAPI.Dtos.News
 {
     public class NewsDto : NewsDtoAbstract
     {

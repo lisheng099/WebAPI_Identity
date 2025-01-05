@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using WebAPI.Dtos;
+using WebAPI.Dtos.NewsFiles;
 using WebAPI.Interfaces;
+using WebAPI.Parameters;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,151 +10,81 @@ namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NewsFilesController(INewsServer newsServer,IWebHostEnvironment webHostEnvironment) : ControllerBase
+    public class NewsFilesController(INewsService newsServer) : ControllerBase
     {
-        private readonly INewsServer _newsServer = newsServer;
-        private readonly IWebHostEnvironment _webHostEnvironment = webHostEnvironment;
+        private readonly INewsService _newsServer = newsServer;
 
         // GET: api/<NewsFilesController>
-        [HttpGet]
-        public IActionResult Get(String Id)
+        [HttpGet("{NewsId}")]
+        [Authorize(Roles = "User")]
+        public IActionResult Get(Guid NewsId)
         {
-            if (Guid.TryParse(Id, out Guid newsId)) 
-            {
-                var result = _newsServer.GetNewsFilesByNewsId(newsId);
+            var result = _newsServer.GetNewsFilesByNewsId(NewsId);
 
-                if (result == null || result.Count() == 0)
-                {
-                    NotFound("找不到資料");
-                }
-                return Ok(result);
-            }
-            else
+            if (result == null || result.Count() == 0)
             {
-                return NotFound("Id格式錯誤");
+                NotFound("找不到資料");
             }
+            return Ok(result);
         }
 
         // GET api/<NewsFilesController>/5
-        [HttpGet("{FilesId}")]
-        public IActionResult Get(string Id, string FilesId)
+        [HttpGet("{NewsId}/{newsFilesId}")]
+        [Authorize(Roles = "User")]
+        public IActionResult Get(Guid NewsId, Guid newsFilesId)
         {
-            if (Guid.TryParse(Id, out Guid newsId) && Guid.TryParse(FilesId, out Guid newsFilesId))
-            {
-                var result = _newsServer.GetNewsFilesByNewsId_NewsFilesId(newsId, newsFilesId);
+            var result = _newsServer.GetNewsFilesByNewsId_NewsFilesId(NewsId, newsFilesId);
 
-                if (result == null)
-                {
-                    NotFound("找不到資料");
-                }
-                return Ok(result);
-            }
-            else
+            if (result == null)
             {
-                return NotFound("Id格式錯誤");
+                NotFound("找不到資料");
             }
+            return Ok(result);
         }
 
         // POST api/<NewsFilesController>
-        [HttpPost]
-        public IActionResult Post(string Id, List<IFormFile> files)
+        [HttpPost("{NewsId}")]
+        [Authorize(Roles = "User")]
+        public IActionResult Post(Guid NewsId, [FromForm] NewsFilesPostDto value)
         {
-            if (Guid.TryParse(Id, out Guid newsId))
+            value.NewsId = NewsId;
+            var result = _newsServer.PostNewsFiles(value);
+            if (result == null)
             {
-                string rootRoot = _webHostEnvironment.ContentRootPath + @"\wwwroot\NewsFiles\" + newsId + @"\";
-                if (!Directory.Exists(rootRoot))
-                {
-                    Directory.CreateDirectory(rootRoot);
-                }
-                List<NewsFilesDto> result = new List<NewsFilesDto>();
-                foreach(IFormFile file in files)
-                {
-                    if (file.Length > 0)
-                    {
-                        var fileName = file.FileName;
-                        using (var stream = System.IO.File.Create(rootRoot + fileName))
-                        {
-                            file.CopyTo(stream);
-                            NewsFilesPostDto value = new NewsFilesPostDto{
-                                Name = fileName,
-                                Path = "/NewsFiles/" + newsId + "/" + fileName
-                            };
-
-                            result.Add(_newsServer.PostNewsFiles(newsId, value));
-                        }
-                    }
-                }
-                if (result == null)
-                {
-                    NotFound("找不到資料");
-                }
-                return Ok(result);
+                NotFound("找不到資料");
             }
-            else
-            {
-                return NotFound("Id格式錯誤");
-            }
+            return Ok(result);
         }
 
         // PUT api/<NewsFilesController>/5
-        [HttpPut("{FilesId}")]
-        public IActionResult Put(string Id, string FilesId, [FromBody] NewsFilesPutDto value)
+        [HttpPut("{NewsId}/{newsFilesId}")]
+        [Authorize(Roles = "User")]
+        public IActionResult Put(Guid NewsId, Guid newsFilesId, [FromForm] NewsFilesPutDto value)
         {
-            if (Guid.TryParse(Id, out Guid newsId) && Guid.TryParse(FilesId, out Guid newsFilesId))
-            {
-                var result = _newsServer.PutNewsFiles(newsId, newsFilesId, value);
-                if (result == null)
-                {
-                    NotFound("找不到資料");
-                }
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound("Id格式錯誤");
-            }
-        }
+            value.NewsFilesIdParameter = new NewsFilesIdParameter { NewsId = NewsId, NewsFilesId = newsFilesId };
 
-        // PATCH api/<NewsFilesController>/5
-        [HttpPatch("{FilesId}")]
-        public IActionResult Patch(string Id, string FilesId, [FromBody] JsonPatchDocument value)
-        {
-            if (Guid.TryParse(Id, out Guid newsId) && Guid.TryParse(FilesId, out Guid newsFilesId))
+            var result = _newsServer.PutNewsFiles(value);
+            if (result == null)
             {
-                var result = _newsServer.PatchNewsFiles(newsId, newsFilesId, value);
-                if (result == null)
-                {
-                    NotFound("找不到資料");
-                }
-                return Ok(result);
+                NotFound("找不到資料");
             }
-            else
-            {
-                return NotFound("Id格式錯誤");
-            }
+            return Ok(result);
         }
 
         // DELETE api/<NewsFilesController>/5
-        [HttpDelete("{FilesId}")]
-        public IActionResult Delete(string Id, string FilesId)
+        [HttpDelete("{NewsId}/{newsFilesId}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(Guid NewsId, Guid newsFilesId)
         {
-            if (Guid.TryParse(Id, out Guid newsId) && Guid.TryParse(FilesId, out Guid newsFilesId))
+            if (_newsServer.DeleteNewsFiles(new NewsFilesIdParameter { NewsId = NewsId, NewsFilesId = newsFilesId }))
             {
-                if (_newsServer.DeleteNewsFiles(newsId, newsFilesId))
-                {
-                    return NoContent();
-                }
-                else
-                {
-                    return NotFound("找不到資料");
-                }
+                return NoContent();
             }
             else
             {
-                return NotFound("Id格式錯誤");
+                return NotFound("找不到資料");
             }
         }
-
 
     }
 }

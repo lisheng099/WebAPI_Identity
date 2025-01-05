@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using WebAPI.Dtos;
+using WebAPI.Abstracts;
 
 namespace WebAPI.ValidationAttributes
 {
@@ -7,9 +7,9 @@ namespace WebAPI.ValidationAttributes
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            var timeRange = (ITimeRange)value;
+            var timeRange = (NewsDtoAbstract)value;
             if (timeRange == null) {
-                return new ValidationResult("傳入的資料未繼承自ITimeRange，所以無法使用ValidationResult驗證。");
+                return new ValidationResult("傳入的資料未繼承自NewsDtoAbstract，所以無法使用ValidationResult驗證。");
             }
 
             if(timeRange.StartDateTime >= timeRange.EndDateTime)

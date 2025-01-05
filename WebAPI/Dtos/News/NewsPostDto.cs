@@ -4,10 +4,9 @@ using WebAPI.Abstracts;
 using WebAPI.Models;
 using WebAPI.ValidationAttributes;
 
-namespace WebAPI.Dtos
+namespace WebAPI.Dtos.News
 {
     public class NewsPostDto : NewsDtoAbstract
     {
-        public Guid InsertEmployeeId { get; set; }
     }
 }
